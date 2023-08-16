@@ -1,3 +1,5 @@
 .active{
-    color: rgb(255, 191, 0)
+    background-color: transparent;
+    color: rgb(255, 255, 255);
+    font-size: 18px;
 }

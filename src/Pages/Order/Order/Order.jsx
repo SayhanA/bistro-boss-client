@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import coverImg from '../../../assets/shop/banner2.jpg'
 import Cover from '../../../Shared/Cover/Cover';
 
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
-import { useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { FaAngleLeft, FaAngleRight } from 'react-icons/fa';
+import { AuthContext } from '../../../providers/AuthProvider';
+import Swal from 'sweetalert2';
+import useCart from '../../../hooks/useCart';
 
 
 const Order = () => {
@@ -15,11 +18,16 @@ const Order = () => {
     const { category } = useParams();
     const initialIndex = allCategories.indexOf(category);
 
+    const { user } = useContext(AuthContext);
+    const [ cart, refetch ] = useCart();
+    const location = useLocation();
+    const navigate = useNavigate();
+
     const [categories, setCategories] = useState('salad')
     const [tabIndex, setTabIndex] = useState(initialIndex);
 
     useEffect(() => {
-        fetch(`http://localhost:5000/menu`)
+        fetch(`https://bistro-boss-server-opal.vercel.app/menu`)
             .then(res => res.json())
             .then(data => {
                 const recommendedRecommended = data.filter(data => data.category === categories)
@@ -29,14 +37,14 @@ const Order = () => {
 
     const [data, setData] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
-    const [itemsPerPage, setItemsPerPage] = useState(6);
+    const [itemsPerPage] = useState(6);
 
     const totalPages = Math.ceil(length / itemsPerPage);
 
     const pageNumbers = [...Array(totalPages).keys()];
 
     useEffect(() => {
-        fetch(`http://localhost:5000/menu/${categories}?pages=${currentPage}&limit=${itemsPerPage}`)
+        fetch(`https://bistro-boss-server-opal.vercel.app/menu/${categories}?pages=${currentPage}&limit=${itemsPerPage}`)
             .then(res => res.json())
             .then(data => {
                 setData(data)
@@ -52,7 +60,49 @@ const Order = () => {
     // }
     // console.log("Page Numbers:",pageNumbers.length)
     // console.log("Current Page:",currentPage)
-    
+
+    const handleAddToCart = item => {
+        console.log(item);
+        const { name, image, price, _id } = item;
+        const orderItem = { menuItemId: _id, name, image, price, email: user?.email }
+        if (user) {
+            fetch('https://bistro-boss-server-opal.vercel.app/carts', {
+                method: "POST",
+                headers: {
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify(orderItem)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.insertedId) {
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Food added on the cart.',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+                        refetch(); //refetch cart to update the number of items in the cart
+                    }
+                })
+        }
+        else {
+            Swal.fire({
+                title: 'Please Login to order the food',
+                text: "Warning",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Login now!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    navigate('/login', {state: {from: location}})
+                }
+            })
+        }
+    }
 
     return (
         <div>
@@ -83,7 +133,7 @@ const Order = () => {
                                         <h2 className="card-title">{data.name}</h2>
                                         <p>{data.recipe.slice(0, 80)}</p>
                                         <div className="card-actions">
-                                            <button className="btn btn-ghost border-0 border-b-4 border-yellow-700">Add to cart</button>
+                                            <button onClick={() => handleAddToCart(data)} className="btn btn-ghost border-0 border-b-4 border-yellow-700">Add to cart</button>
                                         </div>
                                     </div>
                                 </div>
@@ -104,7 +154,7 @@ const Order = () => {
                                         <h2 className="card-title">{data.name}</h2>
                                         <p>{data.recipe.slice(0, 80)}</p>
                                         <div className="card-actions">
-                                            <button className="btn btn-ghost border-0 border-b-4 border-yellow-700">Add to cart</button>
+                                            <button onClick={() => handleAddToCart(data)} className="btn btn-ghost border-0 border-b-4 border-yellow-700">Add to cart</button>
                                         </div>
                                     </div>
                                 </div>
@@ -125,7 +175,7 @@ const Order = () => {
                                         <h2 className="card-title">{data.name}</h2>
                                         <p>{data.recipe.slice(0, 80)}</p>
                                         <div className="card-actions">
-                                            <button className="btn btn-ghost border-0 border-b-4 border-yellow-700">Add to cart</button>
+                                            <button onClick={() => handleAddToCart(data)} className="btn btn-ghost border-0 border-b-4 border-yellow-700">Add to cart</button>
                                         </div>
                                     </div>
                                 </div>
@@ -146,7 +196,7 @@ const Order = () => {
                                         <h2 className="card-title">{data.name}</h2>
                                         <p>{data.recipe.slice(0, 80)}</p>
                                         <div className="card-actions">
-                                            <button className="btn btn-ghost border-0 border-b-4 border-yellow-700">Add to cart</button>
+                                            <button onClick={() => handleAddToCart(data)} className="btn btn-ghost border-0 border-b-4 border-yellow-700">Add to cart</button>
                                         </div>
                                     </div>
                                 </div>
@@ -167,7 +217,7 @@ const Order = () => {
                                         <h2 className="card-title">{data.name}</h2>
                                         <p>{data.recipe.slice(0, 80)}</p>
                                         <div className="card-actions">
-                                            <button className="btn btn-ghost border-0 border-b-4 border-yellow-700">Add to cart</button>
+                                            <button onClick={() => handleAddToCart(data)} className="btn btn-ghost border-0 border-b-4 border-yellow-700">Add to cart</button>
                                         </div>
                                     </div>
                                 </div>
@@ -179,13 +229,13 @@ const Order = () => {
 
             <div className='pagination w-fit mx-auto flex items-center'>
                 {
-                    currentPage === 0 || <FaAngleLeft onClick={() => { setCurrentPage(currentPage-1) }} className='text-5xl text-gray-500 hover:bg-gray-500 hover:text-white w-[53px] h-[53px]'/>
+                    currentPage === 0 || <FaAngleLeft onClick={() => { setCurrentPage(currentPage - 1) }} className='text-5xl text-gray-500 hover:bg-gray-500 hover:text-white w-[53px] h-[53px]' />
                 }
                 {
                     pageNumbers.map(number => <button key={number} className={currentPage === number ? "selection border px-7 py-3 text-xl font-bold bg-gray-500" : " border px-7 py-3 text-xl font-bold hover:bg-gray-300"} onClick={() => { setCurrentPage(number) }} >{number + 1}</button>)
                 }
                 {
-                    pageNumbers.length == currentPage+1 ? "" : <FaAngleRight onClick={() => { setCurrentPage(currentPage+1) }} className='text-5xl text-gray-500 hover:bg-gray-500 hover:text-white w-[53px] h-[53px]' />
+                    pageNumbers.length == currentPage + 1 ? "" : <FaAngleRight onClick={() => { setCurrentPage(currentPage + 1) }} className='text-5xl text-gray-500 hover:bg-gray-500 hover:text-white w-[53px] h-[53px]' />
                 }
             </div>
 

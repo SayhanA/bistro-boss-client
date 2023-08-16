@@ -2,14 +2,14 @@ import bgImg from "../../assets/reservation/wood-grain-pattern-gray1x.png";
 import desingImg from "../../assets/others/authentication2.png";
 import { loadCaptchaEnginge, LoadCanvasTemplate, validateCaptcha } from 'react-simple-captcha';
 import { useContext, useEffect, useState } from "react";
-import { FaFacebookF, FaGithub, FaGoogle } from "react-icons/fa";
 import { AuthContext } from "../../providers/AuthProvider";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import SocialLogin from "../../Shared/SocialLogin/SocialLogin";
 
 const Login = () => {
     const [value, setValue] = useState('');
     const [disabled, setDisabled] = useState(true);
-    const { googleSignIn, signIn } = useContext(AuthContext);
+    const { signIn } = useContext(AuthContext);
     const navigate = useNavigate();
     const location = useLocation();
     
@@ -44,14 +44,6 @@ const Login = () => {
         const value1 = event.target.value;
         console.log(value1)
         setValue(value1);
-
-        // if (validateCaptcha(value1)==true) {
-        //     setDisabled(false);
-        // }
-
-        // else {
-        //     setDisabled(true)
-        // }
     }
 
     const handleKey = (e) => {
@@ -68,17 +60,6 @@ const Login = () => {
         }
     }
 
-    const handleGoogleLogin = () => {
-        googleSignIn()
-        .then(result => {
-            const user = result.user;
-            console.log(user);
-            navigate(from)
-        })
-        .then(data => {
-            console.log(data)
-        })
-    }
 
     return (
         <div className="relative">
@@ -120,11 +101,7 @@ const Login = () => {
                     <div className="flex flex-col justify-center items-center gap-5">
                         <h5 className="text-[#D1A054] font-semibold">New here? <Link to="/signUp" className="font-extrabold">Create a New Account</Link></h5>
                         <p className="font-semibold"><span className="font-bold">Or</span> sign in with</p>
-                        <div className="flex gap-10">
-                            <div className="w-[50px] h-[50px] flex justify-center items-center text-3xl rounded-full border-2 border-black hover:scale-125 hover:bg-primary hover:text-white transition-all"> <FaFacebookF /> </div>
-                            <div onClick={handleGoogleLogin} className="w-[50px] h-[50px] flex justify-center items-center text-3xl rounded-full border-2 border-black hover:scale-125 hover:bg-primary hover:text-white transition-all"> <FaGoogle /> </div>
-                            <div className="w-[50px] h-[50px] flex justify-center items-center text-3xl rounded-full border-2 border-black hover:scale-125 hover:bg-primary hover:text-white transition-all"> <FaGithub /> </div>
-                        </div>
+                        <SocialLogin />
                     </div>
                 </div>
             </form>

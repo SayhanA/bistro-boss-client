@@ -1,13 +1,14 @@
 import bgImg from "../../assets/reservation/wood-grain-pattern-gray1x.png";
 import desingImg from "../../assets/others/authentication2.png";
 // import { loadCaptchaEnginge, LoadCanvasTemplate, validateCaptcha } from 'react-simple-captcha';
-import { FaFacebookF, FaGithub, FaGoogle } from "react-icons/fa";
 import { useContext } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
 import { Link, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import SocialLogin from "../../Shared/SocialLogin/SocialLogin";
 
 const SignUp = () => {
-    const { createUser, googleSignIn, updateUser } = useContext(AuthContext);
+    const { createUser, updateUser } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const handleSubmit = event => {
@@ -25,9 +26,32 @@ const SignUp = () => {
             console.log(user);
             updateUser(name, photo)
             .then(result => {
+                const savedUser = { name, email };
+                fetch(`https://bistro-boss-server-opal.vercel.app/users`, {
+                    method: 'POST',
+                    headers: {
+                        'content-type': 'application/json',
+                    },
+                    body: JSON.stringify(savedUser)
+                }) 
+                .then(res => res.json())
+                .then(data => {
+                    if(data.insertedId){
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Your work has been saved',
+                            showConfirmButton: false,
+                            timer: 1500
+                          })
+                        navigate('/');
+                        
+                    }
+                })
+                
                 const user = result.user;
                 console.log(user);
-                navigate('/');
+                
                 
             })
             .catch(error => {
@@ -39,16 +63,6 @@ const SignUp = () => {
         })
     }
 
-    const handleGoogleLogin = () => {
-        googleSignIn()
-        .then(result => {
-            const user = result.user;
-            console.log(user);
-        })
-        .then(data => {
-            console.log(data)
-        })
-    }
 
     return (
         <div className="relative">
@@ -91,11 +105,7 @@ const SignUp = () => {
                     <div className="flex flex-col justify-center items-center gap-5">
                         <h5 className="text-[#D1A054] font-semibold">Already have an Account? <Link to="/login" className="font-extrabold">Login</Link></h5>
                         <p className="font-semibold"><span className="font-bold">Or</span> sign in with</p>
-                        <div className="flex gap-10">
-                            <div className="w-[50px] h-[50px] flex justify-center items-center text-3xl rounded-full border border-2 border-black"> <FaFacebookF /> </div>
-                            <div onClick={handleGoogleLogin} className="w-[50px] h-[50px] flex justify-center items-center text-3xl rounded-full border border-2 border-black"> <FaGoogle /> </div>
-                            <div className="w-[50px] h-[50px] flex justify-center items-center text-3xl rounded-full border border-2 border-black"> <FaGithub /> </div>
-                        </div>
+                        <SocialLogin />
                     </div>
                 </div>
                 <div className="flex justify-center items-center">
